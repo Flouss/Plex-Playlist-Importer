@@ -4,7 +4,7 @@
 
 ## Overview
 
-This script allows you to import multiple `.m3u` or `.m3u8` playlist files into your Plex music library. This script optimizes performance by fetching and mapping media items from Plex only once per batch import, reducing redundant API calls when importing multiple playlists.
+This script allows you to import multiple `.m3u` or `.m3u8` playlist files into your Plex music library. The script optimizes performance by fetching and mapping media items from Plex only once per batch import, reducing redundant API calls when importing multiple playlists.
 
 ## Features
 
