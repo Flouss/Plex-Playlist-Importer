@@ -1,10 +1,12 @@
 # Plex Playlist Importer
 
-**Version:** 0.16o
+**Version:** 06.2025
+Forked from: https://github.com/TomHarkness/Plex-Playlist-Importer
 
 ## Overview
 
-This script allows you to import multiple `.m3u` or `.m3u8` playlist files into your Plex music library. The script optimizes performance by fetching and mapping media items from Plex only once per batch import, reducing redundant API calls when importing multiple playlists.
+This script allows you to import multiple `.m3u` or `.m3u8` playlist files into your Plex music library.
+The script optimizes performance by fetching and mapping media items from Plex only once per batch import, reducing redundant API calls when importing multiple playlists.
 
 ## Features
 
@@ -43,28 +45,29 @@ This project is open-source under the MIT License.
 
 ## Usage
 
-### Command-Line Arguments
+### Setup venv
 
-- `--library-id`: (Required) The ID of the Plex music library to import playlists to.
-- `playlist_file(s)`: (Required) One or more `.m3u` or `.m3u8` playlist files to import.
+Setup venv and install requirements
 
-## Configuration
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install requirements.txt
+```
 
-Update the following constants in the script to match your Plex server configuration:
+### Configuration
 
-```python
-PLEX_URL = "https://your-plex-server-url"
-PLEX_TOKEN = "your-plex-token"
+Set the following constants in the `.env` (created it if missing, use `.env.example` as base) to match your Plex server configuration:
+
+```.env
+PLEX_URL = "http://plex.server.lan"
+PLEX_TOKEN = "your token here"
+PLAYLIST_FOLDER_PATH = "the playlist folder"
+LIBRARY_ID = 1
 ```
 ### Running the Script
 
 ```bash
-python3 playlistimportv0.16o.py --library-id 7 playlist1.m3u playlist2.m3u8
+python3 playlistimport.py
 ```
-### Example Usage
 
-Run the script to import multiple playlists into your Plex server’s specified library. This example uses library ID 7 and two playlist files:
-
-```bash
-python3 playlistimportv0.16o.py --library-id 7 ~/Music/Playlists/Chill.m3u ~/Music/Playlists/Rock.m3u8
-```
