@@ -1,7 +1,6 @@
 import os
 import logging
 import sys
-import argparse
 from dotenv import load_dotenv, dotenv_values
 from plexapi.server import PlexServer
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -20,6 +19,8 @@ logging.basicConfig(
 load_dotenv()
 plex_url = os.getenv("PLEX_URL")
 plex_token = os.getenv("PLEX_TOKEN")
+library_id = int(os.getenv("LIBRARY_ID"))
+playlist_folder_path = os.getenv("PLAYLIST_FOLDER_PATH")
 
 def connect_to_plex():
     """Connect to the Plex server."""
@@ -74,8 +75,9 @@ def create_media_map(all_tracks):
         if hasattr(track, 'media'):
             for media in track.media:
                 for part in media.parts:
-                    full_path = part.file.lower().replace(' ', '').replace('(', '').replace(')', '').replace('+', '')
+                    full_path = os.path.join(*part.file.split(os.sep)[-2:]).lower().replace(' ', '').replace('(', '').replace(')', '').replace('+', '')
                     media_path_map[full_path] = track
+                    logging.info(full_path)
 
         if idx % 1000 == 0:
             logging.info(f"Processed {idx} tracks...")
@@ -95,13 +97,14 @@ def match_tracks(playlist_paths, media_path_map):
     matched_tracks = []
 
     for path in playlist_paths:
-        normalized_path = path.lower().replace(' ', '').replace('(', '').replace(')', '').replace('+', '')
+        normalized_path = os.path.join(*path.split(os.sep)[-2:]).lower().replace(' ','').replace('(', '').replace(')', '').replace('+', '')
+
         if normalized_path in media_path_map:
             track = media_path_map[normalized_path]
             matched_tracks.append(track)
             logging.info(f"Track matched and added to playlist: {track.title}")
         else:
-            logging.warning(f"Track not found in media map: {path}")
+            logging.warning(f"Track not found in media map: {normalized_path}")
 
     logging.info(f"Total tracks collected for playlist: {len(matched_tracks)}")
     return matched_tracks
@@ -130,7 +133,7 @@ def create_or_update_playlist(plex, playlist_title, track_items):
     except Exception as e:
         logging.error(f"Failed to create or update playlist '{playlist_title}': {e}")
 
-def main(library_id, playlist_files):
+def main(library_id, playlist_folder_path):
     plex = connect_to_plex()
     library_section = retrieve_library_section(plex, library_id)
 
@@ -139,6 +142,8 @@ def main(library_id, playlist_files):
     media_map = create_media_map(all_tracks)
 
     # Process each playlist file
+    playlist_files = [ os.path.join(playlist_folder_path, f) for f in os.listdir(playlist_folder_path) if f.endswith(".m3u") or f.endswith(".m3u8")]
+
     for playlist_file in playlist_files:
         logging.info(f"Processing playlist file: {playlist_file}")
 
@@ -150,18 +155,4 @@ def main(library_id, playlist_files):
         create_or_update_playlist(plex, playlist_title, matched_tracks)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Import multiple M3U playlists to Plex.")
-    parser.add_argument(
-        "--library-id",
-        required=True,
-        type=int,
-        help="Library ID of the Plex music library."
-    )
-    parser.add_argument(
-        "playlist_files",
-        nargs='+',
-        help="Paths to one or more playlist files (M3U or M3U8) to import."
-    )
-    args = parser.parse_args()
-
-    main(args.library_id, args.playlist_files)
+    main(library_id, playlist_folder_path)
