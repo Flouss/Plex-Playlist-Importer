@@ -6,7 +6,7 @@ from plexapi.server import PlexServer
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from plexapi.exceptions import Unauthorized
 
-# Version 0.17o
+# Version 06.2025
 
 # Set up logging
 logging.basicConfig(
